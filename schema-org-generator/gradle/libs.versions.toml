@@ -1,0 +1,9 @@
+[versions]
+kotlinGradlePlugin = "1.5.10"
+schemaOrgGenerator = "0.7.0"
+
+[libraries]
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
+schema-org-generator = { module = "com.weedow:schema-org-generator", version.ref = "schemaOrgGenerator" }
+
+[plugins]
