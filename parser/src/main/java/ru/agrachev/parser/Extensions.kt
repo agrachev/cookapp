@@ -1,13 +1,13 @@
 package ru.agrachev.parser
 
-import ru.agrachev.parser.builder.JsonLdValue
-import ru.agrachev.parser.transformer.CustomSchemaDataProvider
 import com.weedow.schemaorg.commons.model.JsonLdDataType
 import com.weedow.schemaorg.commons.model.JsonLdNode
 import org.schema.model.HowToStep
 import org.schema.model.ImageObject
 import org.schema.model.ItemList
 import org.schema.model.PropertyValue
+import ru.agrachev.parser.builder.JsonLdValue
+import ru.agrachev.parser.transformer.CustomSchemaDataProvider
 import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -26,32 +26,34 @@ internal fun <T> Class<T>.toSchemaNode() = this as Class<out JsonLdNode>
 @Suppress("UNCHECKED_CAST")
 internal fun <T> Class<T>.toSchemaData() = this as Class<out JsonLdValue>
 
-typealias CompletionCondition<T> = T.() -> Boolean
+typealias CompletionRule<T> = T.() -> Boolean
 
-val a = buildMap {
-    completionCondition<HowToStep> {
+val completionRules = buildMap {
+    completionRule<HowToStep> {
         text != null && getImage<Any?>().isCompleted()
     }
-    completionCondition<ImageObject> {
+    completionRule<ImageObject> {
         url != null
     }
-    completionCondition<PropertyValue> {
+    completionRule<PropertyValue> {
         name != null && getValue<Any?>().isCompleted()
     }
-    completionCondition<ItemList> {
+    completionRule<ItemList> {
         name != null
     }
 }
 
-inline fun <reified K : JsonLdNode> MutableMap<Class<out JsonLdNode>, CompletionCondition<*>>.completionCondition(
-    noinline condition: CompletionCondition<K>,
+inline fun <reified K : JsonLdNode> MutableMap<Class<out JsonLdNode>, CompletionRule<*>>.completionRule(
+    noinline condition: CompletionRule<K>,
 ) {
     put(K::class.java, condition)
 }
 
 @Suppress("UNCHECKED_CAST")
-internal inline fun <T : JsonLdNode> T.isCompleted(): Boolean =
-    (a[this::class.java.interfaces[0]] as? CompletionCondition<T>)?.let { this.it() } ?: true
+internal inline fun <T : JsonLdNode> T.isCompleted(): Boolean = this::class.java.let { clazz ->
+    (completionRules[clazz.interfaces.first { it.isAssignableFrom(clazz) }] as? CompletionRule<T>)?.let { this.it() }
+        ?: true
+}
 
 internal inline fun <T> JsonLdDataType<T>.isCompleted() = value != null
 

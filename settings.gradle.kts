@@ -23,3 +23,5 @@ dependencyResolutionManagement {
 rootProject.name = "CookApp"
 include(":app")
 include(":parser")
+include(":core-domain")
+project(":core-domain").projectDir = file("core/domain")

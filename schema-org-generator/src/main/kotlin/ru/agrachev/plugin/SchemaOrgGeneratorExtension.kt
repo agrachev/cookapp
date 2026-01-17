@@ -37,7 +37,7 @@ abstract class SchemaOrgGeneratorExtension(project: Project) {
     var dataTypePackage: String? by propertyDelegate(dataTypePackageProperty)
     var verbose: Boolean? by propertyDelegate(verboseProperty)
 
-    private fun <V> propertyDelegate(delegateProperty: Property<V>):
+    private fun <V : Any> propertyDelegate(delegateProperty: Property<V>):
             PropertyDelegate<V> = object : PropertyDelegate<V> {
         override fun getValue(
             thisRef: Any?,
@@ -53,7 +53,7 @@ abstract class SchemaOrgGeneratorExtension(project: Project) {
             delegateProperty.set(value)
     }
 
-    private fun <V> propertyListDelegate(delegateProperty: ListProperty<V>):
+    private fun <V : Any> propertyListDelegate(delegateProperty: ListProperty<V>):
             PropertyDelegate<List<V>> = object : PropertyDelegate<List<V>> {
         override fun getValue(
             thisRef: Any?,
