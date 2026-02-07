@@ -32,8 +32,6 @@ import androidx.constraintlayout.compose.ConstraintSet
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.agrachev.cookapp.presentation.theme.CookAppTheme
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 class MainActivity : ComponentActivity() {
     lateinit var viewModel: MainActivityViewModel
@@ -68,14 +66,6 @@ class MainActivity : ComponentActivity() {
             with(intent) {
                 if (action == Intent.ACTION_SEND && type == "text/plain") {
                     getStringExtra(Intent.EXTRA_TEXT)?.let {
-                        val text = BufferedReader(
-                            InputStreamReader(
-                                assets.open("Fasolada.html")
-                            )
-                        )
-                            .use { inputStream ->
-                                inputStream.readText()
-                            }
                         viewModel.parseUrl(it)
                     }
                 }
