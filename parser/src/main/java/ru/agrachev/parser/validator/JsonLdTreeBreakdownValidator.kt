@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.weedow.schemaorg.commons.model.JsonLdNode
 import ru.agrachev.parser.JsonLdTypeMapper
@@ -30,11 +31,13 @@ internal class JsonLdTreeBreakdownValidator(
                 objectNode.properties()
                     .forEach { (property, node) ->
                         when {
-                            node.isValueNode -> validateValue(
-                                property, node, schemaClass,
-                            )?.let { replaceWith ->
-                                with(objectNode as ObjectNode) {
-                                    set<ObjectNode>(property, replaceWith)
+                            node.isValueNode -> {
+                                validateValue(
+                                    property, node, schemaClass,
+                                )?.let { replaceWith ->
+                                    with(objectNode as ObjectNode) {
+                                        set<JsonNode>(property, replaceWith)
+                                    }
                                 }
                             }
 
@@ -64,21 +67,26 @@ internal class JsonLdTreeBreakdownValidator(
         property: String, node: JsonNode, schemaClass: Class<out JsonLdNode>
     ): JsonNode? = schemaClass
         .getFieldOrNull(property)?.typeClass?.let { typeClass ->
-            if (typeClass.isSchemaNode) {
-                objectMapper.valueToTree<JsonNode>(
-                    NamedObject(
-                        type = typeClass.simpleName,
-                        identifier = node.asText(),
+            when {
+                typeClass.isSchemaNode ->
+                    objectMapper.valueToTree<JsonNode>(
+                        NamedObject(
+                            type = typeClass.simpleName,
+                            identifier = node.asText(),
+                        )
                     )
-                )
-            } else {
-                null
+
+                // TODO move into separate property adjustor
+                property == "commentCount" && node.nodeType == JsonNodeType.STRING ->
+                    objectMapper.valueToTree<JsonNode>(node.asText().toInt())
+
+                else -> null
             }
         }
 
     private fun Class<*>.getFieldOrNull(fieldName: String) = try {
         getDeclaredField(fieldName)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null
     }
 
@@ -86,8 +94,6 @@ internal class JsonLdTreeBreakdownValidator(
         @get:JsonProperty(TYPE_PROPERTY) val type: String,
         val identifier: String?,
     )
-
-    companion object {
-        private const val TYPE_PROPERTY = "@type"
-    }
 }
+
+private const val TYPE_PROPERTY = "@type"

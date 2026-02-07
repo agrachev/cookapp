@@ -4,7 +4,9 @@ import com.weedow.schemaorg.commons.model.JsonLdDataType
 import com.weedow.schemaorg.commons.model.JsonLdFieldTypes
 import com.weedow.schemaorg.commons.model.JsonLdNode
 import org.jsoup.nodes.Element
+import ru.agrachev.parser.ResolverCreator
 import ru.agrachev.parser.SchemaDataProvider
+import ru.agrachev.parser.di.ListOfResolverCreators
 import ru.agrachev.parser.getOrDefault
 import ru.agrachev.parser.isCompleted
 import ru.agrachev.parser.isSchemaData
@@ -77,19 +79,23 @@ internal class JsonLdNodeBuilder<T : JsonLdNode> private constructor(
     }
 
     internal class Builder<T : JsonLdNode>(
-        private val resolutionContainer: ResolutionContainer,
+        private val resolutionContainerFactory: (ListOfResolverCreators<T>) -> ResolutionContainer,
     ) {
 
+        private val delegateCreators = mutableListOf<ResolverCreator<T>>()
         private var schemaDataProvider: SchemaDataProvider<T>? = null
 
         inline fun transformer(noinline schemaDataProvider: SchemaDataProvider<T>) {
             this.schemaDataProvider = schemaDataProvider
         }
-        //private val delegateCreators = mutableListOf<ResolverCreator<T>>()
 
-        //fun resolver(creator: ResolverCreator<T>) = delegateCreators.add(creator)
+        fun customResolver(creator: ResolverCreator<T>) =
+            delegateCreators.add(creator)
 
-        fun build() = JsonLdNodeBuilder(resolutionContainer, schemaDataProvider)
+        fun build() = JsonLdNodeBuilder(
+            resolutionContainerFactory(delegateCreators),
+            schemaDataProvider,
+        )
     }
 }
 

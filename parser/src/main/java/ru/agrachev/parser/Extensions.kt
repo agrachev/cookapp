@@ -7,6 +7,7 @@ import org.schema.model.ImageObject
 import org.schema.model.ItemList
 import org.schema.model.PropertyValue
 import ru.agrachev.parser.builder.JsonLdValue
+import ru.agrachev.parser.resolver.CustomResolver
 import ru.agrachev.parser.transformer.CustomSchemaDataProvider
 import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
@@ -76,7 +77,7 @@ private inline val Type.typeClass
         else -> this
     } as Class<*>
 
-internal typealias ResolverCreator<T> = () -> KFunction<T>
+internal typealias ResolverCreator<T> = KFunction<CustomResolver<T>>
 internal typealias SchemaDataProvider<T> = () -> KFunction<CustomSchemaDataProvider<T>>
 
 @Suppress("UNCHECKED_CAST")

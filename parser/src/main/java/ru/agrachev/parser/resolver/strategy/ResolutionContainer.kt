@@ -1,12 +1,12 @@
 package ru.agrachev.parser.resolver.strategy
 
-import ru.agrachev.parser.builder.JsonLdValue
 import com.weedow.schemaorg.commons.model.JsonLdNode
 import org.jsoup.nodes.Element
+import ru.agrachev.parser.builder.JsonLdValue
 import ru.agrachev.parser.isCompleted
 
 internal class ResolutionContainer(
-    val resolutionStrategies: Collection<ResolutionStrategy>,
+    private val resolutionStrategies: Collection<ResolutionStrategy>,
 ) {
     fun resolveSchemaValue(
         name: String,

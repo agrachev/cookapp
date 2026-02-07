@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-android {
+android<App> {
     namespace = "ru.agrachev.cookapp"
     compileSdk = 36
 
